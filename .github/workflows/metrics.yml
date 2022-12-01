@@ -12,7 +12,7 @@ jobs:
     steps:
       - uses: lowlighter/metrics@latest
         with:
-          filename: visuals/github-metrics.svg
+          filename: github-metrics.svg
           template: repository
           repo: AdventOfCode
           token: ${{ secrets.METRICS_TOKEN }}
@@ -20,5 +20,5 @@ jobs:
           base: "metadata"
           plugin_languages: yes
 	  plugin_languages_details: percentage
-          plugin_languages_recent_days: 0
-          config_order: languages, base.metadata
+	  plugin_languages_recent_days: 0
+	  config_order: languages, base.metadata
