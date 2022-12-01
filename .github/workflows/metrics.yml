@@ -1,3 +1,4 @@
+
 name: Metrics
 on:
   # (optional) Run workflow manually
@@ -19,6 +20,5 @@ jobs:
           config_timezone: Europe/Berlin
           base: "metadata"
           plugin_languages: yes
-	  plugin_languages_details: percentage
-	  plugin_languages_recent_days: 0
-	  config_order: languages, base.metadata
+          plugin_languages_recent_days: 0
+          config_order: languages, base.metadata
