@@ -13,7 +13,7 @@ jobs:
     steps:
       - uses: lowlighter/metrics@latest
         with:
-          filename: github-metrics.svg
+          filename: visuals/github-metrics.svg
           template: repository
           repo: AdventOfCode
           token: ${{ secrets.METRICS_TOKEN }}
