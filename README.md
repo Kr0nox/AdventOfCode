@@ -8,6 +8,8 @@ Whatever I feel like today. But it will most likely either be Java, Python or c+
 |Day|Language|
 |--|--|
 |1|Java|
+|2|Java|
+|3|Java|
 
 ## Try it yourself
 https://adventofcode.com
