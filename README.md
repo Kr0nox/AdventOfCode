@@ -22,6 +22,7 @@ Whatever I feel like today. But it will most likely either be Java, Python or c+
 |9|Java|
 |10|Java|
 |11|Java|
+|12|Java|
 
 ## Try it yourself
 https://adventofcode.com
