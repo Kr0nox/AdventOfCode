@@ -7,7 +7,7 @@ Whatever I feel like today. But it will most likely either be Java, Python or c+
 ### Percentage used
 ![Metrics](/visuals/github-metrics.svg)
 ### 2022
-![](https://img.shields.io/badge/stars%20⭐-34-yellow)
+![](https://img.shields.io/badge/stars%20⭐-36-yellow)
 
 |Day|Language|
 |--|--|
@@ -28,6 +28,7 @@ Whatever I feel like today. But it will most likely either be Java, Python or c+
 |15|Java|
 |16|Java|
 |17|Java|
+|18|Java|
 
 ## Try it yourself
 https://adventofcode.com
