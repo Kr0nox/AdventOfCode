@@ -1,5 +1,5 @@
 *.in
 *.out
-*.md
+challenge*.md
 *.exe
 *.json
