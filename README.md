@@ -6,8 +6,18 @@
 Whatever I feel like today. But it will most likely either be Java, Python, C++ or Haskell
 ### Percentage used
 ![Metrics](/visuals/github-metrics.svg)
-### (2022)[2022/README.md]
+
+<h3>2023</h3>
+![](https://img.shields.io/badge/stars%20⭐-2-yellow)
+|Day|Language|
+|--|--|
+|1|Haskell|
+
+<h3><a href="2022/README.md">2022</a></h3>
 ![](https://img.shields.io/badge/stars%20⭐-36-yellow)
 
 ## Try it yourself
 https://adventofcode.com
+
+## CLI Helper
+I use the [aco-cli from namelessgroup](https://github.com/NamelessGroup/AdventOfCode-CLI)
