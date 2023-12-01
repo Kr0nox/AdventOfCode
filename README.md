@@ -8,12 +8,15 @@ Whatever I feel like today. But it will most likely either be Java, Python, C++ 
 ![Metrics](/visuals/github-metrics.svg)
 
 <h3>2023</h3>
+
 ![](https://img.shields.io/badge/stars%20⭐-2-yellow)
+
 |Day|Language|
 |--|--|
 |1|Haskell|
 
 <h3><a href="2022/README.md">2022</a></h3>
+
 ![](https://img.shields.io/badge/stars%20⭐-36-yellow)
 
 ## Try it yourself
