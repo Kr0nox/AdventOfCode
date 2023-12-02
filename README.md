@@ -3,17 +3,18 @@
 
 
 ## What language do I use?
-Whatever I feel like today. But it will most likely either be Java, Python, C++ or Haskell
+Whatever I feel like today. But it will most likely either be Java, Python, C++, Typescript or Haskell
 ### Percentage used
 ![Metrics](/visuals/github-metrics.svg)
 
 <h3>2023</h3>
 
-![](https://img.shields.io/badge/stars%20⭐-2-yellow)
+![](https://img.shields.io/badge/stars%20⭐-4-yellow)
 
 |Day|Language|
 |--|--|
 |1|Haskell|
+|2|TypeScript|
 
 <h3><a href="2022/README.md">2022</a></h3>
 
