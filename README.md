@@ -9,7 +9,7 @@ Whatever I feel like today. But it will most likely either be Java, Python, C++,
 
 <h3>2023</h3>
 
-![](https://img.shields.io/badge/stars%20⭐-39-yellow)
+![](https://img.shields.io/badge/stars%20⭐-40-yellow)
 
 |Day|Language|
 |--|--|
