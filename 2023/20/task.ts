@@ -13,7 +13,7 @@ export async function taskOne(input: string[]): Promise<void> {
     let ls = 0
     const keys = Object.keys(g)
     while (i < 1000) {
-        const [_h, _l, _s] = execute(g)
+        const [_h, _l] = execute(g)
         hs += _h
         ls += _l
         let init = true
