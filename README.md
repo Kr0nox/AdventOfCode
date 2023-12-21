@@ -41,7 +41,7 @@ Whatever I feel like today. But it will most likely either be Java, Python, C++,
 
 <h3><a href="2021/README.md">2021</a></h3>
 
-![](https://img.shields.io/badge/stars%20⭐-10-yellow)
+![](https://img.shields.io/badge/stars%20⭐-24-yellow)
 
 ## Try it yourself
 https://adventofcode.com
