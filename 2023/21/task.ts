@@ -2,7 +2,7 @@ export async function taskOne(_input: string[]): Promise<void> {
     const sRow = _input.findIndex(i => i.includes('S'))
     const input = _input.map(s => s.split(""))
     const sCol = input[sRow].indexOf('S')
-    console.log(explore(input, [sRow, sCol]))
+    console.log(explore(input, [sRow, sCol], 589)) // 301732
 }
 
 export async function taskTwo(_input: string[]): Promise<void> {
@@ -14,21 +14,30 @@ export async function taskTwo(_input: string[]): Promise<void> {
     const sRow = _input.findIndex(i => i.includes('S'))
     const input = _input.map(s => s.split(""))
     const sCol = input[sRow].indexOf('S')
-    console.log(sCol, sRow)
-    const cardinals = (26501365-sCol)/(input.length)
-    const sBlock = explore(input, [sCol, sRow], 262+65)
-    let cards = 0
-    for (const dir of [[0,sCol],[sCol,0],[input.length-1,sCol],[sCol, input.length-1]]) {
-        cards += explore(input, dir as [number,number], 262) * (cardinals-1)
-        cards += explore(input, dir as [number,number], 131)
+    
+    let i = sCol + input.length
+    let c = 1
+    let o = 1
+    let e = 0
+    while(i < 26501365) {
+        if ( i % 2 == 0) e += 4*c
+        else o += 4*c
+        c++
+        i += input.length
     }
-    let corners = 0
-    for (const dir of [[0,0],[input.length-1,0],[0,input.length-1],[input.length-1, input.length-1]]) {
-        corners += explore(input, dir as [number,number], 131+65) * (((cardinals-2)*(cardinals-3))/2)
-        corners += explore(input, dir as [number,number], 131) * (cardinals-1)
-    }
-    console.log(sBlock+cards+corners)
+    const oddFieldValue = explore(input, [sCol, sRow] as [number,number], input.length) * o
+    const evenFieldValue = explore(input, [sCol, sRow] as [number, number], input.length+1) * e
 
+    let incompleteEnds = 0
+    for (const dir of [[0,sCol],[sCol,0],[input.length-1,sCol],[sCol, input.length-1]]) {
+        incompleteEnds += explore(input, dir as [number,number], input.length-1)
+    }
+    let incompleteCorners = 0
+    for (const dir of [[0,0],[input.length-1,0],[0,input.length-1],[input.length-1, input.length-1]]) {
+        incompleteCorners += explore(input, dir as [number,number], input.length+sCol-1) * (c-1)
+        incompleteCorners += explore(input, dir as [number,number], sCol-1) * c
+    }
+    console.log(oddFieldValue + evenFieldValue + incompleteEnds + incompleteCorners)
 }
 
 
@@ -54,7 +63,7 @@ function explore(grid: string[][], start: [number, number], num = 64) {
                     if (i < 0 || j < 0 || i >= grid.length || j >= grid[0].length) continue
                     if (i != q[0] && j != q[1]) continue
                     if (i == q[0] && j == q[1]) continue
-                    if (grid[i][j] == '#') continue
+                    if (grid[(i)][(j)] == '#') continue
                     next.add(to([i,j]))
                 }
             }
