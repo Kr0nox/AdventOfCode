@@ -36,6 +36,7 @@ Whatever I feel like today. But it will most likely either be Java, Python, C++,
 |20|TypeScript|
 |21|TypeScript|
 |22|TypeScript|
+|23|TypeScript|
 
 <h3><a href="2022/README.md">2022</a></h3>
 
