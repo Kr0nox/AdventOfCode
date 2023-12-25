@@ -19,8 +19,6 @@ export async function taskOne(input: string[]): Promise<void> {
   let potential: [string, string][][] = [];
   const keys = Object.keys(graph);
   const keys2 = keys.reverse();
-  let i = 0
-  let maxPos = 200
   for (const k1 of keys) {
     for (const k2 of keys2) {
       if (k1 == k2) continue;
