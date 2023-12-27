@@ -43,18 +43,6 @@ export async function taskTwo(input: string[]): Promise<void> {
     console.log(t1 + t2 + t3)
 }
 
-function print(grid: string[][]) {
-    for (let j = 0; j < grid.length; j++) {
-        
-        let line = ""
-        for (let i = 0 ; i <grid[0].length; i++) {
-            line += grid[j][i]
-        }
-        console.log(line)
-    }
-    console.log(" ")
-}
-
 function walk(grid: string[][], winds: number[][], start: number[], end: number[]) {
     function toSet(nums: number[]) {
         return nums[0] + nums[1]*grid.length
