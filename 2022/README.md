@@ -1,5 +1,5 @@
 # 2022
-![](https://img.shields.io/badge/stars%20⭐-36-yellow)
+![](https://img.shields.io/badge/stars%20⭐-42-yellow)
 
 ![Metrics](../visuals/github-metrics-2022.svg)
 
