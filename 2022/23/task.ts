@@ -15,8 +15,20 @@ export async function taskOne(input: string[]): Promise<void> {
     for (let _c = 0; _c < 10; _c++) {
         const proposedMoves: Set<string> = new Set()
         const duplicate: Set<string> = new Set()
+        for (const e1 of elfs) {
+            for (const e2 of elfs) {
+                const p1 = Math.abs(e1.postion[0]-e2.postion[0])
+                const p2 = Math.abs(e1.postion[1]-e2.postion[1])
+                if (p1 <= 1 && p2 <=1 && p1+p2 > 0) {
+                    e1.hasNeighbour = true
+                    e2.hasNeighbour = true
+                    break;
+                }
+            }
+        }
+
         for (const e of elfs) {
-            if (!hasNeighbours(elfs, e)) continue
+            if (!e.hasNeighbour) continue
             for (let f = 0; f < 4; f++) {
                 const r = moveList[f](elfs, e)
                 if (r != undefined) {
@@ -34,6 +46,7 @@ export async function taskOne(input: string[]): Promise<void> {
         const F = moveList.shift() as ProposeMove
         moveList.push(F)
         for (const e of elfs) {
+            e.hasNeighbour = false
             if (e.proposed == undefined) continue
             if (!duplicate.has(e.proposed[0]+","+e.proposed[1])) e.postion = e.proposed
             e.proposed = undefined
@@ -72,21 +85,18 @@ export async function taskTwo(input: string[]): Promise<void> {
         let anyNeighbour = false
         const proposedMoves: Set<string> = new Set()
         const duplicate: Set<string> = new Set()
-        for (const e1 of elfs) {
-            if (e1.hasNeighbour) continue
-            for (const e2 of elfs) {
-                if (e2.hasNeighbour) continue
-                const p1 = Math.abs(e1.postion[0]-e2.postion[0])
-                const p2 = Math.abs(e1.postion[0]-e2.postion[0])
+        for (let e1 = 0; e1 < elfs.length; e1++) {
+            for (let e2 = e1+1; e2 < elfs.length; e2++) {
+                const p1 = Math.abs(elfs[e1].postion[0]-elfs[e2].postion[0])
+                const p2 = Math.abs(elfs[e1].postion[1]-elfs[e2].postion[1])
                 if (p1 <= 1 && p2 <=1 && p1+p2 > 0) {
-                    e1.hasNeighbour = true
-                    e2.hasNeighbour = true
+                    elfs[e1].hasNeighbour = true
+                    elfs[e2].hasNeighbour = true
                     anyNeighbour = true
-                    break;
                 }
             }
         }
-        console.log(elfs.filter(e => e.hasNeighbour))
+        //console.log(elfs.filter(e => e.hasNeighbour))
         if (!anyNeighbour) break;
         for (const e of elfs) {
             if (!e.hasNeighbour) continue
@@ -113,7 +123,6 @@ export async function taskTwo(input: string[]): Promise<void> {
             e.proposed = undefined
             moved = true
         }
-        console.log(i)
     }
     console.log(i)
 }
