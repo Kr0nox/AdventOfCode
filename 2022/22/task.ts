@@ -91,8 +91,9 @@ export async function taskTwo(input: string[]): Promise<void> {
         }
         const steps = parseInt(test.trim())
         for (let j = 0; j < steps; j++) {
-            if (grid[y+dirY][x+dirX] == '#') break
-            else if (grid[y+dirY][x+dirX] == ' ') {
+            if (grid[y+dirY][x+dirX] == '#') {
+                break
+            } else if (grid[y+dirY][x+dirX] == ' ') {
                 //console.log('space')
                 //console.log(x,y, dirX, dirY)
                 const [_x, _y, _dirX, _dirY] = newPosDir(x,y, dirX, dirY, sideMap, sideLength)
@@ -174,8 +175,8 @@ function entryDir(entry: CubeSide): [number, number] {
     switch(entry) {
         case 't': return [0, 1]
         case 'b': return [0, -1]
-        case 'r': return [1, 0]
-        case 'l': return [-1, 0] 
+        case 'r': return [-1, 0]
+        case 'l': return [1, 0] 
     }
 }
 
@@ -246,8 +247,6 @@ function getCubeEntrySides(grid: string[][], sideLength: number) {
         }
 
     } while(updated)
-
-    console.log(sides)
 
     return sides
 }
