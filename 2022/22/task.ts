@@ -73,7 +73,8 @@ export async function taskTwo(input: string[]): Promise<void> {
             grid[ind + 1][jnd + 1] = j 
         })
     })
-    //console.log(grid.map(i => i.join("")).join("\n"))
+    const sideLength = 50
+    const sideMap = getCubeEntrySides(grid, sideLength)
 
     let dirX = 1
     let dirY = 0
@@ -93,8 +94,9 @@ export async function taskTwo(input: string[]): Promise<void> {
             if (grid[y+dirY][x+dirX] == '#') break
             else if (grid[y+dirY][x+dirX] == ' ') {
                 //console.log('space')
-                const [_x, _y, _dirX, _dirY] = newPosDir(x,y, dirX, dirY)
-                console.log(_x, _y, _dirX, _dirY)
+                //console.log(x,y, dirX, dirY)
+                const [_x, _y, _dirX, _dirY] = newPosDir(x,y, dirX, dirY, sideMap, sideLength)
+                //console.log(_x, _y, _dirX, _dirY)
                 //console.log(" ")
                 if (grid[_y][_x] == '#') break
                 else {
@@ -123,8 +125,6 @@ export async function taskTwo(input: string[]): Promise<void> {
                 dirY = newY
             }
         }
-        //console.log(dirX, dirY)
-        //console.log(" ")
         i++
     }
     let F = -1
@@ -136,92 +136,131 @@ export async function taskTwo(input: string[]): Promise<void> {
     console.log(1000*y+4*x+F)
 }
 
-function newPosDir(x: number, y: number, dirX: number, dirY: number, sideLength = 50): [number, number, number, number] {
-    let fieldX = -1
-    if (x >= 1 && x <= sideLength) fieldX = 0
-    if (x >= sideLength+1 && x <= 2*sideLength) fieldX = 1
-    if (x>=1+2*sideLength && x <= 3*sideLength) fieldX = 2
-    if (x >= 4*sideLength) fieldX= 3
-    let fieldY = -1
-    if (y>=1 && y <= sideLength) fieldY = 0
-    if (y>=1+sideLength && y<=2*sideLength) fieldY = 1
-    if (y>=1+2*sideLength) fieldY = 2
-    let cubeSide = -1
-    if (fieldY == 0) cubeSide = 1
-    else if (fieldY == 1) {
-        cubeSide = [2,3,4][fieldX]
-    } else {
-        cubeSide = [-1, -1, 5, 6][fieldX]
-    }
-    console.log('leaving side', cubeSide, 'at', x, y, 'field', fieldX, fieldY, 'with dir', dirX, dirY)
+type CubeSide = 't'|'b'|'l'|'r'
+type SideMap = Record<CubeSide, [number, number, CubeSide]>
 
-    if (cubeSide == 1) {
-        if (dirY == -1) {
-            // 2
-            return [sideLength - (x-2*sideLength) + 1, 1 + sideLength, 0, 1]
-        }
-        if (dirX == 1) {
-            // 6
-            return [4*sideLength, 3* sideLength - y + 1, -1, 0]
-        } else {
-            return [y+sideLength, 1 + sideLength, 0, -1]
-        }
+function getNewPos(exit: CubeSide, entry: CubeSide, s: [number, number], l: number): [number, number] {
+    if (exit == 't') {
+        if (entry == 't') return [l-s[0]+1,1]
+        if (entry == 'b') return [s[0], l]
+        if (entry == 'l') return [1, s[0]]
+        if (entry == 'r') return [l, l-s[0]+1]
+    }
+    if (exit == 'b') {
+        if (entry == 'b') return [l-s[0]+1, l]
+        if (entry == 't') return [s[0], 1]
+        if (entry == 'l') return [1, l-s[0]+1]
+        if (entry == 'r') return [l, s[0]]
+    }
+    if (exit == 'l') {
+        if (entry == 'l') return [1, l-s[1]+1]
+        if (entry == 'r') return [l, s[0]]
+        if (entry == 't') return [s[1], 1]
+        if (entry == 'b') return [l-s[1]+1 ,l]
+    }
+    if (exit == 'r') {
+        if (entry == 'r') return [l, l-s[1]+1]
+        if (entry == 'l') return [1, s[1]]
+        if (entry == 't') return [l-s[1]+1, 1]
+        if (entry == 'b') return [s[1], l]
     }
 
-    if (cubeSide == 2) {
-        if (dirX == -1) {
-            // 6
-            return [3*sideLength+(sideLength-(y-sideLength)+1), 3*sideLength, 0, 1]
-        } 
-        if (dirY == 1) {
-            // 5
-            return [2*sideLength+ (sideLength-x+1), 3*sideLength, 0, -1]
-        } else {
-            // 1
-            return [2*sideLength + (sideLength- x + 1), 1, 0, 1]
-        }
-    }
+    console.log(exit, entry, s, l)
+    throw "Could not map exit to entry"
 
-    if (cubeSide == 3) {
-        if (dirY == -1) {
-            // 1
-            return [2*sideLength+1, (x-sideLength), 1, 0]
-        } else {
-            // 5
-            return [3*sideLength+1, 2*sideLength+(sideLength-(x-sideLength)+1), 1, 0]
-        }
-    }
+}
 
-    if (cubeSide == 4) {
-        // 6
-        return [3*sideLength + (sideLength-(y-sideLength)+1), 2*sideLength+1, 0, 1]
+function entryDir(entry: CubeSide): [number, number] {
+    switch(entry) {
+        case 't': return [0, 1]
+        case 'b': return [0, -1]
+        case 'r': return [1, 0]
+        case 'l': return [-1, 0] 
     }
+}
 
-    // ab hier extra abgezogen schon
-    if (cubeSide == 5) {
-        if (dirX == -1) {
-            //3
-            return [sideLength+(sideLength-(y-2*sideLength)+1), 2*sideLength, 0, -1]
-        } else {
-            // 2
-            return [sideLength-(x-2*sideLength)+1, 2*sideLength, 0, -1]
+function exitSide(xDir: number, yDir: number): CubeSide {
+    if (xDir == 1) return 'r'
+    if (xDir == -1) return 'l'
+    if (yDir == 1) return 'b'
+    if (yDir == -1) return 't'
+    throw "Unknown Dir"
+}
+
+function getCubeEntrySides(grid: string[][], sideLength: number) {
+    const isSide = Array.from({length: (grid.length-2)/sideLength}, () => Array.from({length: (grid[0].length-2)/sideLength}, () => false))
+    for (let y = 1; y < grid.length-1; y+=sideLength) {
+        for (let x = 1; x < grid[y].length-1; x+=sideLength) {
+            //console.log(y,x, (y-1)/sideLength, (x-1)/sideLength)
+            isSide[(y-1)/sideLength][(x-1)/sideLength] = grid[y][x] != ' '
         }
     }
 
-    if (cubeSide == 6) {
-        if (dirX == 1) {
-            // 1
-            return [3*sideLength, sideLength-(y-2*sideLength)+1, -1, 0]
-        }
-        if (dirY == 1) {
-            // 4
-            return [3*sideLength, sideLength + (sideLength-(y-3*sideLength)+1), -1, 0]
-        } else {
-            // 2
-            return [1, sideLength+(sideLength-(x-3*sideLength)+1), 1, 0]
+    const sides:SideMap[][] = isSide.map((i) => i.map((j) => ({} as SideMap)))
+
+    for (let i = 0; i < sides.length; i++) {
+        for (let j = 0; j < sides[i].length -1; j++) {
+            if (!isSide[i][j]) continue
+            if (isSide[i][j+1]) {
+                sides[i][j]['r'] = [i, j+1, 'l'];
+                sides[i][j+1]['l'] = [i, j, 'r']
+            }
+            if (i+1 >= sides.length) continue
+            if (isSide[i+1][j]) {
+                sides[i][j]['b'] = [i+1, j, 't']
+                sides[i+1][j]['t'] = [i, j, 'b']
+            }
         }
     }
+    let updated = false
+    const clockwise: Record<CubeSide, CubeSide> = {
+        'l': 't',
+        't': 'r',
+        'r': 'b',
+        'b': 'l'
+    }
+    const cClockwise: Record<CubeSide, CubeSide> = {
+        'r': 't',
+        't': 'l',
+        'l': 'b',
+        'b': 'r'
+    }
+    do {
+         updated = false
+        for (let i = 0; i < sides.length; i++) {
+            for (let j = 0; j < sides[i].length; j++) {
+                if (!isSide[i][j]) continue
+                for (const d of ['t','b','l','r'] as CubeSide[]) {
+                    if (sides[i][j][d] != undefined) continue
+                    for (const c of [clockwise, cClockwise]) {
+                        const aC1 = sides[i][j][c[d]]
+                        if (aC1 == undefined) continue
+                        const ac2 = sides[aC1[0]][aC1[1]][c[aC1[2]]]
+                        if (ac2 == undefined) continue
+                        sides[i][j][d] = [ac2[0],ac2[1],c[ac2[2]]]
+                        sides[ac2[0]][ac2[1]][c[ac2[2]]] = [i,j,d]
+                        updated = true
+                    }
+                }
+            }
+        }
 
-    console.log(x,y,fieldX,fieldY,dirX, dirY,cubeSide)
-    throw "MEP"
+    } while(updated)
+
+    console.log(sides)
+
+    return sides
+}
+
+function newPosDir(x: number, y: number, dirX: number, dirY: number, sideMap: SideMap[][], sideLength = 50): number[] {
+    const fieldX = Math.floor((x-1)/sideLength)
+    const fieldY = Math.floor((y-1)/sideLength)
+    //console.log(fieldX, fieldY)
+
+    const exit = exitSide(dirX, dirY)
+    const next = sideMap[fieldY][fieldX][exit]
+    const newPos = getNewPos(exit, next[2], [x-fieldX*sideLength,y-fieldY*sideLength], sideLength)
+    const newDir = entryDir(next[2])
+
+    return [newPos[0]+next[1]*sideLength, newPos[1]+next[0]*sideLength, newDir[0], newDir[1]]
 }

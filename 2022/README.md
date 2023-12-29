@@ -1,5 +1,5 @@
 # 2022
-![](https://img.shields.io/badge/stars%20⭐-42-yellow)
+![](https://img.shields.io/badge/stars%20⭐-48-yellow)
 
 ![Metrics](../visuals/github-metrics-2022.svg)
 
@@ -23,3 +23,10 @@
 |16|Java|
 |17|Java|
 |18|Java|
+|19|TypeScript|
+|20|TypeScript|
+|21|TypeScript|
+|22|TypeScript|
+|23|TypeScript|
+|24|TypeScript|
+|25|TypeScript|

@@ -42,7 +42,7 @@ Whatever I feel like today. But it will most likely either be Java, Python, C++,
 
 <h3><a href="2022/README.md">2022</a></h3>
 
-![](https://img.shields.io/badge/stars%20⭐-42-yellow)
+![](https://img.shields.io/badge/stars%20⭐-48-yellow)
 
 <h3><a href="2021/README.md">2021</a></h3>
 
