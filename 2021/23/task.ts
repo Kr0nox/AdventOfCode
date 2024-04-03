@@ -21,6 +21,8 @@ export async function taskOne(input: string[]): Promise<void> {
             movedOut: false
         }]
     }
+    console.log(u)
+    print(u)
     make(u)
 }
 
@@ -57,7 +59,8 @@ function make(_u: Universe) {
     }
 
     while(queue.length > 0) {
-        const q = queue.shift() as Universe
+    //for (let _c = 0; _c < 5; _c++) {
+        const q = queue.pop() as Universe
         console.log(queue.length, best)
         print(q)
         if (isFinished(q)) {
@@ -65,49 +68,12 @@ function make(_u: Universe) {
         }
         if (q.cost >= best) continue
 
-        for (let i = 0; i < q.rooms.length; i++) {
-            const c = copy(q)
-            if (c.rooms[i][0] != undefined) {
-                if ((c.rooms[i][0] as Amp).movedOut) continue
-                (c.rooms[i][0] as Amp).movedOut = true
-                c.way[roomIndex.indexOf(i)] = c.rooms[i][0]
-                c.cost += c.rooms[i][0]?.cost??0
-                c.rooms[i][0] = undefined
-            } else if (c.rooms[i][1] != undefined) {
-                if ((c.rooms[i][1] as Amp).movedOut) continue
-                (c.rooms[i][1] as Amp).movedOut = true
-                c.way[roomIndex.indexOf(i)] = c.rooms[i][1]
-                c.cost += 2*(c.rooms[i][1]?.cost??0)
-                c.rooms[i][1] = undefined
-            } else {
-                continue
-            }
-            add(c)
-        }
-
         // Move all 
         for (let i = 0; i < q.way.length; i++) {
             if (q.way[i] == undefined) continue
 
-            function insert(index: number, wayIndex: number): Universe|undefined {
-                if (q.rooms[index][0] != undefined) return undefined
-                if (q.rooms[index][1] != undefined || q.rooms[index][1]?.name != q.way[wayIndex]?.name) return undefined
-
-                const c = copy(q)
-                c.cost += (Math.abs(roomIndex.indexOf(index)-wayIndex) + 1) * (c.way[wayIndex]?.cost??0)
-                if (c.rooms[index][1] == undefined) {
-                    c.cost += (c.way[wayIndex]?.cost??0)
-                    c.rooms[index][1] = c.way[wayIndex]
-                } else {
-                    c.rooms[index][0] = c.way[wayIndex]
-                }
-                c.way[wayIndex] = undefined
-                add(c)
-            }
-
             for (let j = i-1; j >= 0; j--) {
                 if (q.way[j] != undefined) break
-                if (roomIndex[j] >= 0) insert(roomIndex[j], i)
                 if (!validPlaces[j]) continue 
                 const c = copy(q)
                 c.way[j] = c.way[i]
@@ -117,7 +83,6 @@ function make(_u: Universe) {
             }
             for (let j = i+1; j < q.way.length; j++) {
                 if (q.way[j] != undefined) break
-                if (roomIndex[j] >= 0) insert(roomIndex[j], i)
                 if (!validPlaces[j]) continue 
                 const c = copy(q)
                 c.way[j] = c.way[i]
@@ -125,10 +90,46 @@ function make(_u: Universe) {
                 c.cost += (c.way[j]?.cost??0) * (j-i)
                 add(c)
             }
-
-            
         }
 
+        for (let i = 0; i < q.way.length; i++) {
+            if (roomIndex[i] < 0) continue
+            if (q.way[i] == undefined) continue
+            const j = roomIndex[i]
+            const c = copy(q)
+            if (q.rooms[j][1] == undefined) {
+                c.rooms[j][1] = c.way[i]
+                c.cost += (c.way[i]?.cost??0)*2
+                c.way[i] = undefined
+            } else if (q.rooms[j][0] == undefined) {
+                if (q.rooms[j][1]?.name != q.way[i]?.name) continue
+                c.rooms[j][0] = c.way[i]
+                c.cost += (c.way[i]?.cost??0)
+                c.way[i] = undefined
+            } else continue
+            add(c)
+        }
+
+        for (let i = 0; i < q.way.length; i++) {
+            if (roomIndex[i] < 0) continue
+            if (q.way[i] != undefined) continue
+            const j = roomIndex[i]
+            const c = copy(q)
+            if (q.rooms[j][0] != undefined) {
+                if (q.rooms[j][0]?.movedOut) continue
+                c.way[i] = q.rooms[j][0];
+                (c.way[i] as Amp).movedOut = true
+                c.cost += c.way[i]?.cost??0
+                c.rooms[j][0] = undefined
+            } else if(q.rooms[j][1] != undefined) {
+                if (q.rooms[j][1]?.movedOut) continue
+                c.way[i] = q.rooms[j][1];
+                (c.way[i] as Amp).movedOut = true
+                c.cost += (c.way[i]?.cost??0)*2
+                c.rooms[j][1] = undefined
+            } else continue
+            add(c)
+        }
         
     }
     console.log(best)
@@ -137,7 +138,12 @@ function make(_u: Universe) {
 
 function isFinished(u: Universe) {
     if (u.way.map(i => i != undefined).reduce((a,b)=> a||b, false)) return false
-    return u.rooms.map(i => i[0] != undefined && i[0].name == i[1]?.name).reduce((a,b) => a&&b, true)
+    if(u.rooms.map(i => i[0] != undefined && i[0].name == i[1]?.name).reduce((a,b) => a&&b, true)) {
+        print(u)
+        throw u.cost
+    }
+    return false
+        
 }
 
 function copy(u: Universe): Universe {
@@ -159,7 +165,7 @@ function print(u: Universe) {
     console.log('#############')
     console.log('#' + u.way.map(i => i==undefined?'.':i.name).join('') + ' #')
     console.log('###' + u.rooms.map(i => i[0]==undefined?'.':i[0].name).join('#') + '###')
-    console.log('  #' + u.rooms.map(i => i[0]==undefined?'.':i[0].name).join('#') + '#')
+    console.log('  #' + u.rooms.map(i => i[1]==undefined?'.':i[1].name).join('#') + '#')
     console.log('  #########')
     console.log(' ')
 }

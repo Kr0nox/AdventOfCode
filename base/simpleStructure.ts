@@ -96,6 +96,10 @@ class JsonSet<S> {
   public remove(val: S) {
     this.set.delete(JSON.stringify(val))
   }
+
+  public get() {
+    return this.set
+  }
 }
 
 class FunctionSet<S> {
