@@ -58,6 +58,7 @@ class Queue<T> {
     if (!this._head) throw "Empty Queue"
     const r = this._head.val
     this._head = this._head.next
+    if(!this._head) this._tail = undefined
     return r
   }
 
