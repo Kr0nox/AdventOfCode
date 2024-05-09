@@ -24,7 +24,6 @@ export async function taskTwo(input: string[]): Promise<void> {
         }
         console.log(r)
     }
-    // ZJHRKCPLYJ
 }
 
 function perform(input: string[]) {
