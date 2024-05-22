@@ -1,4 +1,92 @@
-export async function taskOne(_input: string[]): Promise<void> {
+import {JsonSet, Queue, Stack} from '../../base/simpleStructure'
+
+export async function taskOne(input: string[]): Promise<void> {
+    task(parse(input))
+}
+
+export async function taskTwo(input: string[]): Promise<void> {
+    const floors = parse(input)
+    const newElementCount = 4
+    for (let f = 0; f < floors.length; f++) {
+        for (let i = 0; i < newElementCount; i++) floors[f].push(false)
+    }
+    for (let i = floors[0].length-newElementCount; i < floors[0].length; i++) {
+        floors[0][i] = true
+    }
+    task(floors)
+}
+
+function task(floors: boolean[][]) {
+    const floorCount = floors.length
+    interface State1 {
+        f:boolean[][]
+    }
+    interface State extends State1 {
+        c:number
+        e:number
+    }
+    const Q:Queue<State> = new Queue()
+    const V:Map<string, Representation[]> = new Map()
+    Q.push({
+        f: floors,
+        e: 0,
+        c:0
+    })
+
+    while(!Q.isEmpty()) {
+        const q = Q.pop()
+
+        if (q.f[floorCount-1].every(i => i)) {
+            console.log(q.c)
+            return
+        }
+
+        const h = hash(q.f, q.e)
+        const hF = V.get(h)
+        const rep = floorToRep(q.f)
+        if (hF) {
+            if (hF.some(r => repEqual(rep, r))) continue
+            hF.push(rep)
+        } else {
+            V.set(h, [rep])
+        }
+
+        for (const de of [-1,1]) {
+            if(q.e+de < 0 || q.e+de >= floorCount) continue
+            for (let i = 0; i < floors[q.e].length; i++) {
+                if(!q.f[q.e][i]) continue
+                if (de > 0) {
+                    for (let j = i+1; j < floors[q.e].length; j++) {
+                        if(!q.f[q.e][j]) continue
+                        const newF = copy(q.f)
+                        newF[q.e+de][i] = true
+                        newF[q.e+de][j] = true
+                        newF[q.e][i] = false
+                        newF[q.e][j] = false
+                        if (!isValidFloor(newF[q.e]) || !isValidFloor(newF[q.e+de])) continue
+                        Q.push({
+                            c: q.c+1,
+                            e: q.e+de,
+                            f:newF
+                        })
+                    }
+                }
+                
+                const newF = copy(q.f)
+                newF[q.e+de][i] = true
+                newF[q.e][i] = false
+                if (!isValidFloor(newF[q.e]) || !isValidFloor(newF[q.e+de])) continue
+                Q.push({
+                    c: q.c+1,
+                    e: q.e+de,
+                    f:newF
+                })
+            }
+        }
+    }
+}
+
+function parse(_input: string[]): boolean[][] {
     const input = _input.map(i=> i.split("contains")[1])
     let id = 0
     let floorCount = input.length
@@ -40,117 +128,10 @@ export async function taskOne(_input: string[]): Promise<void> {
             throw "2 " + i + " | " + j
         })
     })
-    interface State {
-        floors: boolean[][]
-        e: number
-        steps: number
-    }
-    //debug(floors)
-    const Q: State[] = [{floors: copy(floors), e: 0, steps:0}]
-    const visited: Set<string> = new Set()
-    //console.log(nameMap)
-    //console.log(floors)
-    let curMin = Infinity
-    while(Q.length > 0) {
-        const q = Q.pop() as State
-        if (visited.has(JSON.stringify({floors: q.floors, e: q.e}))) continue
-        visited.add(JSON.stringify({floors: q.floors, e: q.e}))
-
-        // check for final
-        if (q.floors[floorCount-1].every(i=>i)) {
-            console.log(q.steps)
-            debug(q.floors)
-            if (q.steps < curMin) curMin = q.steps
-            continue
-        }
-        // check for validity
-        //if (q.steps >= curMin) continue
-        let validity = true
-        for (let f = 0; f < floorCount; f++) {
-            let hasRTG = false
-            for (let i = 0; i < q.floors[f].length*2; i+=2) {
-                if (q.floors[f][i]) hasRTG = true
-            }
-            if (hasRTG) {
-                //console.log("rtg on: ", f)
-                for (let i = 1; i < q.floors[f].length*2; i+=2) {
-                    if (q.floors[f][i] && !q.floors[f][i-1]) validity = false 
-                }
-            }
-            
-        }
-        //console.log(validity, q.e)
-        //debug(copy(q.floors))
-        if (!validity) {
-            //console.log("invalid")
-            //debug(copy(q.floors))
-            continue
-        } else {
-            //console.log("valid", q.e)
-            //debug(copy(q.floors))
-        }
-
-
-        for (let i = 0; i < q.floors[q.e].length; i++) {
-            if (!q.floors[q.e][i]) continue
-            let moveP = copy(q)
-            let moveM = copy(q)
-            moveP.e++
-            moveM.steps++
-            moveP.steps++
-            moveM.e--
-            if (moveM.e >= 0) {
-                moveM.floors[q.e][i] = false
-                moveM.floors[q.e-1][i] = true
-                //console.log("M1", moveM)
-                Q.push(moveM)
-            }  
-            if (moveP.e < floorCount) {
-                moveP.floors[q.e][i] = false
-                moveP.floors[q.e+1][i] = true
-               // console.log("P1",i, moveP, q.e)
-                Q.push(moveP)
-                //console.log(Q)
-            }
-        }
-        
-
-        for (let i = 0; i < q.floors[q.e].length; i++) {
-            if (!q.floors[q.e][i]) continue
-            for (let j = i+1; j < q.floors[q.e].length; j++) {
-                if (!q.floors[q.e][j]) continue
-                let moveP = copy(q)
-                let moveM = copy(q)
-                moveP.e++
-                moveM.e--
-                moveM.steps++
-                moveP.steps++
-                if (moveM.e >= 0) {
-                    moveM.floors[q.e][i] = false
-                    moveM.floors[q.e-1][i] = true
-                    moveM.floors[q.e][j] = false
-                    moveM.floors[q.e-1][j] = true
-                   // console.log("M2", moveM)
-                    Q.push(moveM)
-                }  
-                if (moveP.e < floorCount) {
-                    //debug(moveP.floors)
-                    moveP.floors[q.e][i] = false
-                    moveP.floors[q.e+1][i] = true
-                    moveP.floors[q.e][j] = false
-                    moveP.floors[q.e+1][j] = true
-                   // console.log("P2", moveP)
-                    Q.push(moveP)
-                }
-            }
-        }
-    }
-    console.log(curMin)
+    return floors
 }
 
-export async function taskTwo(input: string[]): Promise<void> {
-    console.log("Unimplemented");
-}
+type Representation = [number, number][]
 
 function copy<T>(s: T): T {
     return JSON.parse(JSON.stringify(s))
@@ -159,4 +140,57 @@ function copy<T>(s: T): T {
 function debug(arr: boolean[][]) {
     copy(arr).reverse().forEach(i => console.log(i.map(b => b?'#':'.').join('')))
     console.log("")
+}
+
+function isValidFloor(floor: boolean[]) {
+    let hasGenerator = false
+    for (let i = 0; i < floor.length; i+=2) {
+        if (floor[i]) hasGenerator = true
+    }
+    if (!hasGenerator) return true
+
+    for (let i = 1; i < floor.length; i+=2) {
+        if (!floor[i]) continue
+        if(!floor[i-1]) return false
+    }
+    return true
+}
+
+function floorToRep(floors: boolean[][]): Representation {
+    const r: Representation = []
+    for (let x = 0; x < floors[0].length; x+=2) {
+        let gF = -1
+        for (let i = 0; i < floors.length; i++) {
+            if (floors[i][x]) gF = i
+        }
+        let cF = -1
+        for (let i = 0; i < floors.length; i++) {
+            if (floors[i][x]) cF = i
+        }
+        r.push([gF, cF])
+    }
+    return r.sort(([_1, a], [_2, b]) => a-b).sort(([a,_a], [b,_b]) => a-b)
+}
+
+function repEqual(a: Representation, b: Representation) {
+    for (let i = 0; i < a.length; i++) {
+        if (a[i][0] != b[i][0]) return false
+        if (a[i][1] != b[i][1]) return false
+    }
+    return true
+}
+
+function hash(floors: boolean[][], e: number) {
+    function floorHash(floor: boolean[]) {
+        let pairs = 0
+        let generators = 0
+        let chips = 0
+        for (let i = 0; i < floor.length; i+=2) {
+            if (floor[i]) generators++
+            if (floor[i+1]) chips++
+            if (floor[i] && floor[i+1]) pairs++
+        }
+        return `${pairs}A${generators}${chips}`
+    }
+    return floors.map(floorHash).join('B') + 'C' + e
 }

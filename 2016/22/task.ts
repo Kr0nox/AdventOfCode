@@ -19,72 +19,56 @@ export async function taskOne(input: string[]): Promise<void> {
 
 export async function taskTwo(input: string[]): Promise<void> {
     const grid = parse(input)
-    const V: JsonSet<Plate[][]> = new JsonSet()
-    const Q: Record<number, Queue<State>> = {0:new Queue()}
-    Q[0].push({
-        g: grid,c:0,p:[grid.length-1,0]
-    })
-    let p = {} as Record<string, State>
-    while(true) {
-        const keys = Object.keys(Q).map(Number).sort((a,b) => a-b)
-        let q: State|null = null
-        for (const i of keys) {
-            if (!Q[i].isEmpty()) {
-                q = Q[i].pop()
-                break;
-            }
+    const goal = [0,0]
+    let data: [number, number] = [grid.length-1,0]
+    let empty: [number, number] = [-1,-1]
+    for (let x = 0; x < grid.length; x++) {
+        for (let y = 0; y < grid[x].length; y++) {
+            if (grid[x][y].used == 0) empty = [x,y]
         }
-        /*let s = 0
-        for (const i of keys) s += Q[i].asArray().length
-        console.log(s)*/
-
-
-        if(!q) break
-
-        if (V.has(q.g)) continue
-        if (q.p[0] == 0 && q.p[1] == 0) {
-            /*for(let i = q; i != undefined; i = p[JSON.stringify(i)]) {
-               // print(i)
-               // console.log('')
-            }*/
+    }
+    const V: JsonSet<number[]> = new JsonSet()
+    const Q: Queue<State> = new Queue()
+    Q.push({
+        c:0,d:data,e:empty
+    })
+    while(!Q.isEmpty()) {
+        const q = Q.pop()
+        if (q.d[0] == goal[0] && q.d[1] == goal[1]) {
             console.log(q.c)
             return
         }
-        V.add(q.g)
-        for (let x = 0; x < grid.length; x++) {
-            for (let y = 0; y < grid[x].length; y++) {
-                for (const offset of [[1,0],[-1,0],[0,1],[0,-1]]) {
-                    let dx = x+offset[0]
-                    let dy = y+offset[1]
-                    if (dx < 0 || dy < 0 || dx >= grid.length || dy >= grid[0].length) continue
-                    if (q.g[x][y].used > q.g[dx][dy].avail) continue
-                    const nq = copy(q)
-                    nq.g[dx][dy].avail -= nq.g[x][y].used
-                    nq.g[dx][dy].used += nq.g[x][y].used
-                    nq.g[x][y].used = 0
-                    nq.g[x][y].avail = nq.g[x][y].size
+        if (V.has([q.d[0],q.d[1],q.e[0],q.e[1]])) continue
+        V.add([q.d[0],q.d[1],q.e[0],q.e[1]])
 
-                    if (nq.p[0] == x && nq.p[1] == y) {
-                        nq.p = [dx, dy]
-                    }
-
-                    nq.c++
-                    p[JSON.stringify(nq)] = q 
-                    const d1 = dx+dy
-                    const d2 = Math.abs(q.p[0]- dx) + Math.abs(q.p[1]- dy)
-                    const d = Math.min(d1, d2)
-                    if (Q[d] == undefined) Q[d] = new Queue()
-                    Q[d].push(nq)
-                }
+        for(const dir of [[1,0],[0,1],[-1,0],[0,-1]]) {
+            const dx = q.e[0]+dir[0]
+            const dy = q.e[1]+dir[1]
+            if (dx < 0 || dx >= grid.length) continue
+            if (dy < 0 || dy >= grid[dx].length) continue
+            if (grid[q.e[0]][q.e[1]].size < grid[dx][dy].used) continue
+            if (dx == q.d[0] && dy == q.d[1]) {
+                Q.push({
+                    c: q.c+1,
+                    d: q.e,
+                    e: [dx, dy]
+                })
+            } else {
+                Q.push({
+                    c: q.c+1,
+                    d: q.d,
+                    e: [dx, dy]
+                })
             }
         }
     }
+
 }
 
 interface State {
-    g: Plate[][]
     c: number,
-    p: [number, number]
+    d: [number, number]
+    e: [number, number]
 }
 
 function parse(_input: string[]): Plate[][] {
@@ -120,14 +104,4 @@ interface Plate {
 
 function copy<T>(t:T):T {
     return JSON.parse(JSON.stringify(t))
-}
-
-function print(s: State) {
-    function p(s1:Plate) {
-        return s1.used.toString().padStart(2, ' ') + '/' + s1.size.toString().padStart(2, ' ')
-    }
-    for (const r of s.g) {
-        r.map(p).join(' - ')
-        console.log('  -  '.repeat(r.length))
-    }
 }
