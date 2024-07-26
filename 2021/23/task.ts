@@ -1,171 +1,183 @@
+import {Queue, Stack, PriorityQueue} from '../../base/simpleStructure'
+
 export async function taskOne(input: string[]): Promise<void> {
-    const u: Universe = {
-        cost: 0,
-        way: Array.from({length: 11}, ()=>undefined),
-        rooms: Array.from({length: 4},()=>[undefined, undefined])
-    }
-    const cost: Record<string, number> = {
+    const energyMap: Record<string, number> = {
         'A': 1, 'B': 10, 'C': 100, 'D': 1000
     }
-    for (let i = 0; i < 4; i++) {
-        const j = 2*i+3
-        const n1 = input[2][j]
-        const n2 = input[3][j]
-        u.rooms[i] = [{
-            name: n1,
-            cost: cost[n1],
-            movedOut: false
-        }, {
-            name: n2,
-            cost: cost[n2],
-            movedOut: false
-        }]
+    const sorting = ['A', 'B', 'C', 'D']
+    const goalCol: Record<string, number> = {'A':0, 'B':1, 'C':2, 'D':3}
+    const holeIndexInWalkway = [2,4,6,8]
+    const allowedMovementWalkwayPlace = Array.from({length: 11}, (_,i) => !holeIndexInWalkway.includes(i))
+
+    const Q: PriorityQueue<State> = new PriorityQueue()
+    const initialState: State = {
+        energyUsed: 0,
+        walkWay: Array.from({length: 11}, () => null),
+        holes: [{},{},{},{}]
     }
-    console.log(u)
-    print(u)
-    make(u)
+    for (let i = 0; i < 4; i++) {
+        const x = 3 + i*2
+        initialState.holes[i].top = input[2][x]
+        initialState.holes[i].bottom = input[3][x]
+    }
+    Q.insert(0, initialState)
+    console.log(initialState)
+    let min = Infinity
+    const V = new Map<string, number>()
+
+    while(!Q.isEmpty()) {
+        const state = Q.pop()!
+        // Prune
+        if (state.energyUsed >= min) continue
+
+        if (min <= 25311) {
+            console.log(state)
+        }
+
+
+        // check if state is final
+        let final = true
+        for (let i = 0; i < 4; i++) {
+            if (state.holes[i].top != sorting[i]) final = false
+            if (state.holes[i].bottom != sorting[i]) final = false
+        }
+        if (final) {
+            console.log(final, min)
+            if (state.energyUsed < min) min = state.energyUsed
+            continue
+        }
+
+        // move on walkway
+        for (let i = 0; i < state.walkWay.length; i++) {
+            if (state.walkWay[i] == null) continue
+            const amp = state.walkWay[i]!
+            
+            // check that we can move into destination
+            const goalI = goalCol[amp]
+            const goalHole = state.holes[goalI]
+            if (goalHole.top != undefined || (goalHole.bottom != undefined && goalHole.bottom != amp)) continue
+
+            // Check that way is free to hole
+            const goalInWalkway = holeIndexInWalkway[goalI]
+            const dir = Math.sign(goalInWalkway - i)
+            let wayIsFree = true
+            for (let j = i+dir; j != goalInWalkway; j += dir) {
+                if (state.walkWay[j] != null) wayIsFree = false
+            }
+            if (!wayIsFree) continue
+
+            // move into new hole
+            let energyUsed = Math.abs(goalInWalkway - i)
+            energyUsed += goalHole.bottom == undefined ? 2 : 1
+            energyUsed *= energyMap[amp]
+            const newState = copy(state)
+            newState.energyUsed += energyUsed
+            newState.walkWay[i] = null
+            if (goalHole.bottom == undefined) {
+                newState.holes[goalI].bottom = amp
+            } else {
+                newState.holes[goalI].top = amp
+            }
+            add(newState)
+        }
+
+        // move out of hole
+        for (let i = 0; i < 4; i++) {
+            const hole = state.holes[i]
+            if (hole.bottom == sorting[i] && hole.top == sorting[i]) continue
+            if (hole.bottom == undefined) continue
+            let moveTop = hole.top != undefined
+            const amp = moveTop ? hole.top! : hole.bottom!
+            for (let g = 0; g < state.walkWay.length; g++) {
+                if (!allowedMovementWalkwayPlace[g]) continue
+                if (state.walkWay[g] != undefined) continue
+
+                const walkWayInfrontOfHole = holeIndexInWalkway[i]
+
+                // check that way to goal is free
+                const dir = Math.sign(g- walkWayInfrontOfHole)
+                let isFree = true
+                for (let j = walkWayInfrontOfHole+dir; j != g; j+=dir) {
+                    if (state.walkWay[j] != null) isFree = false
+                }
+                if (!isFree) continue
+
+                let energyUsed = Math.abs(g- walkWayInfrontOfHole)
+                energyUsed += moveTop ? 1:2
+                energyUsed *= energyMap[amp]
+                const newState = copy(state)
+                newState.energyUsed += energyUsed
+                newState.walkWay[g] = amp;
+                if (moveTop) {
+                    newState.holes[i].top = undefined
+                } else {
+                    newState.holes[i].bottom = undefined
+                }
+                add(newState)
+            }
+        }
+    }
+    console.log(min)
+
+    function add(state: State) {
+        const jsonState: JsonState = {
+            holes: state.holes,
+            walkWay: state.walkWay
+        }
+        const key = JSON.stringify(jsonState)
+        if (V.has(key)) {
+            const val = V.get(key)!
+            if (val < state.energyUsed) {
+                return
+            } else {
+                V.set(key, state.energyUsed)
+            }
+        } else {
+            V.set(key, state.energyUsed)
+        }
+
+        let h = 0
+        for (let i = 0; i < 4; i++) {
+            const amp = state.holes[i].top
+            if(!amp) continue
+            const holesToGo = Math.abs(i) - goalCol[amp]
+            h += holesToGo * 2 * energyMap[amp]
+        }
+        for (let i = 0; i < 4; i++) {
+            const amp = state.holes[i].bottom
+            if(!amp) continue
+            const holesToGo = Math.abs(i - goalCol[amp])
+            h += holesToGo * 2 * energyMap[amp]
+        }
+        for (let i = 0; i < state.walkWay.length; i++) {
+            if (state.walkWay[i] == null) continue
+            let amp = state.walkWay[i]!
+            let distanceToGo = Math.abs(i - holeIndexInWalkway[goalCol[amp]])
+            h += distanceToGo * energyMap[amp]
+        }
+
+        Q.insert(state.energyUsed + h, state)
+    }
 }
 
 export async function taskTwo(input: string[]): Promise<void> {
     console.log("Unimplemented");
 }
 
-interface Universe {
-    way: AmpT[]
-    rooms: [AmpT, AmpT][]
-    cost: number
+interface Hole {
+    bottom?: string
+    top?: string
 }
 
-interface Amp {
-    name: string
-    movedOut: boolean
-    cost: number
+interface JsonState {
+    holes: [Hole, Hole, Hole, Hole]
+    walkWay: (string|null)[]
 }
 
-type AmpT = Amp|undefined
-
-const validPlaces = [true, true, false, true, false, true, false, true, false, true, true]
-const roomIndex = [-1,-1,0,-1,1,-1,2,-1,3,-1,-1]
-
-function make(_u: Universe) {
-    const queue: Universe[] = [_u]
-    const dup: Set<string> = new Set([JSON.stringify(_u)])
-    let best = 2*1000*11
-    function add(u: Universe) {
-        const j = JSON.stringify(u)
-        if (dup.has(j)) return
-        queue.push(u)
-        dup.add(j)
-    }
-
-    while(queue.length > 0) {
-    //for (let _c = 0; _c < 5; _c++) {
-        const q = queue.pop() as Universe
-        console.log(queue.length, best)
-        print(q)
-        if (isFinished(q)) {
-            if (q.cost < best) best = q.cost
-        }
-        if (q.cost >= best) continue
-
-        // Move all 
-        for (let i = 0; i < q.way.length; i++) {
-            if (q.way[i] == undefined) continue
-
-            for (let j = i-1; j >= 0; j--) {
-                if (q.way[j] != undefined) break
-                if (!validPlaces[j]) continue 
-                const c = copy(q)
-                c.way[j] = c.way[i]
-                c.way[i] = undefined
-                c.cost += (c.way[j]?.cost??0) * (i-j)
-                add(c)
-            }
-            for (let j = i+1; j < q.way.length; j++) {
-                if (q.way[j] != undefined) break
-                if (!validPlaces[j]) continue 
-                const c = copy(q)
-                c.way[j] = c.way[i]
-                c.way[i] = undefined
-                c.cost += (c.way[j]?.cost??0) * (j-i)
-                add(c)
-            }
-        }
-
-        for (let i = 0; i < q.way.length; i++) {
-            if (roomIndex[i] < 0) continue
-            if (q.way[i] == undefined) continue
-            const j = roomIndex[i]
-            const c = copy(q)
-            if (q.rooms[j][1] == undefined) {
-                c.rooms[j][1] = c.way[i]
-                c.cost += (c.way[i]?.cost??0)*2
-                c.way[i] = undefined
-            } else if (q.rooms[j][0] == undefined) {
-                if (q.rooms[j][1]?.name != q.way[i]?.name) continue
-                c.rooms[j][0] = c.way[i]
-                c.cost += (c.way[i]?.cost??0)
-                c.way[i] = undefined
-            } else continue
-            add(c)
-        }
-
-        for (let i = 0; i < q.way.length; i++) {
-            if (roomIndex[i] < 0) continue
-            if (q.way[i] != undefined) continue
-            const j = roomIndex[i]
-            const c = copy(q)
-            if (q.rooms[j][0] != undefined) {
-                if (q.rooms[j][0]?.movedOut) continue
-                c.way[i] = q.rooms[j][0];
-                (c.way[i] as Amp).movedOut = true
-                c.cost += c.way[i]?.cost??0
-                c.rooms[j][0] = undefined
-            } else if(q.rooms[j][1] != undefined) {
-                if (q.rooms[j][1]?.movedOut) continue
-                c.way[i] = q.rooms[j][1];
-                (c.way[i] as Amp).movedOut = true
-                c.cost += (c.way[i]?.cost??0)*2
-                c.rooms[j][1] = undefined
-            } else continue
-            add(c)
-        }
-        
-    }
-    console.log(best)
-
+interface State extends JsonState {
+    energyUsed: number
 }
 
-function isFinished(u: Universe) {
-    if (u.way.map(i => i != undefined).reduce((a,b)=> a||b, false)) return false
-    if(u.rooms.map(i => i[0] != undefined && i[0].name == i[1]?.name).reduce((a,b) => a&&b, true)) {
-        print(u)
-        throw u.cost
-    }
-    return false
-        
-}
-
-function copy(u: Universe): Universe {
-    return {
-        way: u.way.map(i => {return i != undefined ? {...i} as Amp: undefined}),
-        cost: u.cost,
-        rooms: u.rooms.map(j => j.map(i => {return i != undefined ? {...i} as Amp: undefined}) as [AmpT,AmpT])
-    }
-}
-
-function print(u: Universe) {
-    /*
-    #############
-#...........#
-###B#C#B#D###
-  #A#D#C#A#
-  #########
-    */
-    console.log('#############')
-    console.log('#' + u.way.map(i => i==undefined?'.':i.name).join('') + ' #')
-    console.log('###' + u.rooms.map(i => i[0]==undefined?'.':i[0].name).join('#') + '###')
-    console.log('  #' + u.rooms.map(i => i[1]==undefined?'.':i[1].name).join('#') + '#')
-    console.log('  #########')
-    console.log(' ')
+function copy<T>(t:T):T {
+    return JSON.parse(JSON.stringify(t))
 }

@@ -124,4 +124,40 @@ class FunctionSet<S> {
   }
 }
 
-export { Stack, Queue, JsonSet, FunctionSet }
+class PriorityQueue<T> {
+  private data: [number, T][]
+
+  constructor() {
+    this.data = []
+  }
+
+  public insert(p: number, v: T) {
+    if (this.data.length == 0) {
+      this.data.push([p,v])
+      return
+    }
+
+    for (let index = 0; index < this.data.length; index++) {
+      if (index == this.data.length - 1) {
+        this.data.push([p, v])
+        return
+      }
+
+      if (this.data[index][0] > p) {
+        this.data.splice(index, 0, [p, v])
+        return
+      }
+    }
+  }
+
+  public pop() {
+    return this.data.length == 0 ? null : this.data.pop()![1]
+  }
+
+  public isEmpty() {
+    return this.data.length == 0
+  }
+
+}
+
+export { Stack, Queue, JsonSet, FunctionSet, PriorityQueue }
