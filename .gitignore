@@ -3,3 +3,4 @@
 challenge*.md
 *.exe
 *.json
+**/**/__pycache__/
