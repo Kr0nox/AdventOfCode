@@ -39,8 +39,8 @@ class Stack<T> {
 }
 
 class Queue<T> {
-  private _head: StructureNode<T>|undefined
-  private _tail: StructureNode<T>|undefined
+  protected _head: StructureNode<T>|undefined
+  protected _tail: StructureNode<T>|undefined
 
   public push(v: T) {
     if (!this._tail) {
