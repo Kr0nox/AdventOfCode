@@ -1,3 +1,6 @@
+
+import { readdir, writeFile } from 'fs/promises';
+
 export async function taskOne(input: string[]): Promise<void> {
     const ranges = parseInput(input)
     let minX = 500
@@ -20,63 +23,89 @@ export async function taskOne(input: string[]): Promise<void> {
             }
         }
     }
-    let curFlowSpots: {x:number,y:number}[] = [{x:500-minX, y:0}]
+    
+    const yLen = grid[0].length
     grid[500-minX][0] = WaterState.WATER
+    recurseFrom(500-minX, 0,)
     //print(grid)
+    
+    await writeFile("test.txt", toStringArray(grid).join('\n'))
 
-    while(curFlowSpots.length > 0) {
-        let newSpots: {x:number,y:number}[] = []
-        for (const spot of curFlowSpots) {
-            if (spot.y+1 >= grid[0].length) continue
-            if (grid[spot.x][spot.y+1] == WaterState.NONE) {
-                grid[spot.x][spot.y+1] = WaterState.WATER
-                newSpots.push({x: spot.x, y: spot.y+1})
-            } else {
-                let leftBlocked = false
-                let x1 = spot.x-1
-                let leftSand = false
-                while(x1 >= 0 && grid[x1][spot.y+1] != WaterState.NONE) {
-                    if (grid[x1][spot.y] != WaterState.NONE) {
-                        leftBlocked = true
-                        break
-                    } else if(grid[x1][spot.y+1] == WaterState.SAND) {
-                        leftSand = true
-                    }
-                    x1--
-                }
-                if (!leftBlocked && leftSand) {
-                    grid[x1][spot.y] = WaterState.WATER
-                    newSpots.push({x:x1,y:spot.y})
-                }
-                let rightBlocked = false
-                let rightSand = false
-                let x2 = spot.x+1
-                while(x2 < grid.length && grid[x2][spot.y+1] != WaterState.NONE) {
-                    if (grid[x2][spot.y] != WaterState.NONE) {
-                        rightBlocked = true
-                        break
-                    } else if(grid[x2][spot.y+1] == WaterState.SAND) {
-                        rightSand = true
-                    }
-                    x2++
-                }
 
-                if (!rightBlocked && rightSand) {
-                    grid[x2][spot.y] = WaterState.WATER
-                    newSpots.push({x:x2,y:spot.y})
-                } 
-                if (!(!rightBlocked && rightSand) && !(!leftBlocked && leftSand)) {
-                    newSpots.push({x:spot.x,y:spot.y-1})
-                } 
-                if ((leftSand || leftBlocked) && (rightSand||rightBlocked)) {
-                    for (let x = x1+1; x < x2; x++) {
-                        grid[x][spot.y] = WaterState.WATER
+    function recurseFrom(x: number, y: number) {
+        if (grid[x][y+1] == WaterState.NONE) {
+            let curY = y
+            while((curY + 1) < yLen && grid[x][curY+1] == WaterState.NONE) curY++
+            if ((curY + 1) < yLen) {
+                let filledRow = true
+                while(curY > y) {
+                    while(y < curY && canFillRow(x,curY)) {
+                        fillRow(x,curY)
+                        filledRow = true
+                        curY--
                     }
+                    if (filledRow)
+                        fillDropRow(x, curY)
+                    else 
+                        curY--
+                    filledRow = false
                 }
+                
             }
+            curY = y + 1
+            while(grid[x][curY] == WaterState.NONE) {
+                grid[x][curY] = WaterState.WATER
+                curY++
+            }
+            
+            
+            
         }
-        curFlowSpots = newSpots
     }
+
+    function canFillRow(x: number, y:number) {
+        let cX = x
+        while(cX < grid.length && grid[cX][y] != WaterState.SAND && grid[cX][y+1] != WaterState.NONE) cX++
+        if (cX >= grid.length || grid[cX][y+1] == WaterState.NONE) return false
+        cX = x
+        while(cX >= 0 && grid[cX][y] != WaterState.SAND && grid[cX][y+1] != WaterState.NONE) cX--
+        if (cX < 0 || grid[cX][y+1] == WaterState.NONE) return false
+        return true
+    }
+
+    function fillRow(x: number, y: number) {
+        let cX = x
+        while(cX >= 0 && grid[cX][y] != WaterState.SAND && grid[cX][y+1] != WaterState.NONE) cX--
+        
+        cX++
+        while(grid[cX][y] != WaterState.SAND) {
+            grid[cX][y] = WaterState.WATER
+            cX++
+        }
+    }
+
+    function fillDropRow(x: number, y: number) {
+        let cX = x
+        while(cX < grid.length && grid[cX][y+1] != WaterState.NONE && grid[cX][y] != WaterState.SAND) {
+            grid[cX][y] = WaterState.WATER
+            cX++
+        }
+        if (cX < grid.length && grid[cX][y+1] == WaterState.NONE && grid[cX][y] != WaterState.SAND) {
+            grid[cX][y] = WaterState.WATER
+            recurseFrom(cX,y)
+        }
+        cX = x - 1
+        while(cX >= 0 && grid[cX][y+1] != WaterState.NONE && grid[cX][y] != WaterState.SAND) {
+            grid[cX][y] = WaterState.WATER
+            cX--
+        }
+
+        if (cX >= 0 && grid[cX][y+1] == WaterState.NONE && grid[cX][y] != WaterState.SAND) {
+            grid[cX][y] = WaterState.WATER
+            recurseFrom(cX,y)
+        }
+    }
+
     let count = 0
 
     for (let x = 0; x < grid.length; x++) {
@@ -122,12 +151,18 @@ function parseInput(input: string[]) {
 }
 
 function print(grid: WaterState[][]) {
+    console.log(toStringArray(grid))
+}
+
+function toStringArray(grid: WaterState[][]) {
     const p = Array.from({length: grid[0].length}, () => Array.from({length: grid.length}, () => ' '))
     for (let x = 0; x < grid.length; x++) {
         for (let y = 0; y < grid[x].length; y++) {
             if (grid[x][y] == WaterState.WATER) p[y][x] = '~'
             if (grid[x][y] == WaterState.SAND) p[y][x] = '#'
+            //if (grid[x][y] == WaterState.TEST1) p[y][x] = '1'
+            //if (grid[x][y] == WaterState.TEST2) p[y][x] = '2'
         }
     }
-    p.forEach(i => console.log(i.join('')))
+    return p.map(i => i.join(''))
 }
