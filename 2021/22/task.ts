@@ -32,44 +32,71 @@ export async function taskOne(input: string[]): Promise<void> {
     console.log(sum)
 }
 
-export async function taskTwo(_input: string[]): Promise<void> {
+export async function taskTwo(input: string[]): Promise<void> {
     
-    interface Range<T> {
-        min: number // inc
-        max: number // inc
-        val: T
+    const allCubes: Entry[] = []
+
+    for (const i of input) {
+        const r = /((?:on)|(?:off)) x=(-?[0-9]+)\.\.(-?[0-9]+),y=(-?[0-9]+)\.\.(-?[0-9]+),z=(-?[0-9]+)\.\.(-?[0-9]+)/.exec(i)
+        if (r == null) throw i
+        const b = r[1] == 'on'
+        
+        const nums = r.slice(2).map(j => parseInt(j.trim()))
+        const newCube: Cube = {
+            x1: nums[0],
+            x2: nums[1]+1,
+            y1: nums[2],
+            y2: nums[3]+1,
+            z1: nums[4],
+            z2: nums[5]+1
+        }
+        const newCubes: Entry[] = []
+        if (b) {
+            newCubes.push({cube:newCube, factor: 1})
+        }
+
+        for (const oldCube of allCubes) {
+            const int = getIntersection(oldCube.cube, newCube)
+            if (int !== null) {
+                newCubes.push({cube:int, factor:-oldCube.factor})
+            }
+        }
+        newCubes.forEach(c => allCubes.push(c))
     }
 
-    class RangeManager<T> {
-        public ranges: Range<T>[] = []
+    const r = allCubes.map((e) => {
+        const c = e.cube
+        const v = (c.x2 - c.x1) * (c.y2 - c.y1) * (c.z2 - c.z1)
+        return v * e.factor
+    }).reduce((a,b)=>a+b,0)
+    console.log(r)
 
-        constructor(min: number, max: number, def: T) {
-            this.ranges.push({min,max, val:def})
+    function getIntersection(a: Cube, b: Cube): Cube|null {
+        const intersection = {
+            x1: Math.max(a.x1,b.x1),
+            x2: Math.min(a.x2,b.x2),
+            y1: Math.max(a.y1,b.y1),
+            y2: Math.min(a.y2,b.y2),
+            z1: Math.max(a.z1,b.z1),
+            z2: Math.min(a.z2,b.z2),
         }
-
-        public set(min: number, max: number, val: T) {
-            let i = 0;
-            while(this.ranges[i].min < min) {i++}
-            if (this.ranges[i])
+        if (intersection.x1 > intersection.x2 || intersection.y1 > intersection.y2 || intersection.z1 > intersection.z2) {
+            return null
         }
+        return intersection
+    }
 
-        public get(min: number, max: number): Range<T>[] {
-            const r: Range<T>[] = []
+    interface Cube {
+        x1: number
+        x2: number
+        y1: number
+        y2: number
+        z1: number
+        z2: number
+    }
 
-            let i = 0;
-            while(this.ranges[i].min < min) {i++}
-            if (this.ranges[i].max > max) {
-                return [{min, max, val: this.ranges[i].val}]
-            }
-            r.push({min, max: this.ranges[i].max, val: this.ranges[i].val})
-            i++
-            while(this.ranges[i].max < max) {
-                r.push(this.ranges[i])
-                i++
-            }
-            r.push({min: this.ranges[i].min, max, val: this.ranges[i].val})
-
-            return r
-        }
+    interface Entry {
+        cube: Cube
+        factor: number
     }
 }
