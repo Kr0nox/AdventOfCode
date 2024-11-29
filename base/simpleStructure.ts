@@ -124,40 +124,57 @@ class FunctionSet<S> {
   }
 }
 
-class PriorityQueue<T> {
-  private data: [number, T][]
+class MinHeap<T> {
 
+  private internal: {v:T, p:number}[];
+  
   constructor() {
-    this.data = []
-  }
-
-  public insert(p: number, v: T) {
-    if (this.data.length == 0) {
-      this.data.push([p,v])
-      return
-    }
-
-    for (let index = 0; index < this.data.length; index++) {
-      if (index == this.data.length - 1) {
-        this.data.push([p, v])
-        return
-      }
-
-      if (this.data[index][0] > p) {
-        this.data.splice(index, 0, [p, v])
-        return
-      }
-    }
-  }
-
-  public pop() {
-    return this.data.length == 0 ? null : this.data.pop()![1]
+    this.internal = []
   }
 
   public isEmpty() {
-    return this.data.length == 0
+      return this.internal.length == 0
   }
 
+
+  public pop() {
+    const min = this.internal[0]
+    this.internal[0] = this.internal[this.internal.length - 1]
+    this.internal.pop()
+
+    let index = 0
+    while(true) {
+      const leftIdx = 2*index+1
+      const rightIdx = 2*index+2
+      let smallestIdx = index
+      if (leftIdx < this.internal.length && this.internal[leftIdx].p < this.internal[smallestIdx].p) {
+        smallestIdx = leftIdx
+      }
+      if (rightIdx < this.internal.length && this.internal[rightIdx].p < this.internal[smallestIdx].p) {
+        smallestIdx = rightIdx
+      }
+      if (smallestIdx == index) break
+      else {
+        const t = this.internal[index]
+        this.internal[index] = this.internal[smallestIdx]
+        this.internal[smallestIdx] = t
+      }
+    }
+    return min.v
+  }
+
+  public push(v : T, p: number) {
+    this.internal.push({v,p})
+    let i = this.internal.length - 1
+    let parentIdx = Math.floor((i-1)/2)
+    while(i > 0 && this.internal[parentIdx].p > this.internal[i].p) {
+      let t = this.internal[i]
+      this.internal[i] = this.internal[parentIdx]
+      this.internal[parentIdx] = t
+      i = parentIdx
+      parentIdx = Math.floor((i-1)/2)
+    }
+  }
 }
 
-export { Stack, Queue, JsonSet, FunctionSet, PriorityQueue }
+export { Stack, Queue, JsonSet, FunctionSet, MinHeap }
