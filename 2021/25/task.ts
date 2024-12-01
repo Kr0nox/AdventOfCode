@@ -7,30 +7,34 @@ export async function taskOne(input: string[]): Promise<void> {
     let i = 0
     do {
         moved = false
-        const newField = field.map(i => i.map(j => '.'))
+        const newField = field.map(i => i.map(j => j))
         for (let x = 0; x < xLen; x++) {
             for (let y = 0; y < yLen; y++) {
                 if (field[y][x] == '>') {
                     if(field[y][(x+1)%xLen] == '.') {
+                        newField[y][x] = '.'
                         newField[y][(x+1)%xLen] = '>'
                         moved = true
-                    } else {
-                        newField[y][x] = '>'
                     }
-                } 
-                if (field[y][x] == 'v') {
-                    if(field[(y+1)%yLen][x] == '.') {
-                        newField[(y+1)%yLen][x] = 'v'
-                        moved = true
-                    } else {
-                        newField[y][x] = 'v'
-                    }
-                } 
+                }
             }
         }
-        field = newField
+        const newerField = newField.map(i => i.map(j => j))
+        for (let x = 0; x < xLen; x++) {
+            for (let y = 0; y < yLen; y++) {
+                if (newField[y][x] == 'v') {
+                    if(newField[(y+1)%yLen][x] == '.') {
+                        newerField[y][x] = '.'
+                        newerField[(y+1)%yLen][x] = 'v'
+                        moved = true
+                    } 
+                }
+            }
+        }
+
+        
+        field = newerField
         i++
-        console.log(i)
     } while(moved)
     console.log(i)
     
