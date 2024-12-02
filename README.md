@@ -9,11 +9,12 @@ Whatever I feel like today. But it will most likely either be Java, Python, C++,
 
 <h3>2024</h3>
 
-![](https://img.shields.io/badge/stars%20⭐-2-yellow)
+![](https://img.shields.io/badge/stars%20⭐-4-yellow)
 
 |Day|Language|
 |--|--|
 |1|TypeScript|
+|2|TypeScript|
 
 
 <h3><a href="2023/README.md">2023</a></h3>
