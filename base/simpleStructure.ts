@@ -159,6 +159,7 @@ class MinHeap<T> {
         this.internal[index] = this.internal[smallestIdx]
         this.internal[smallestIdx] = t
       }
+      index = smallestIdx
     }
     return min.v
   }
@@ -175,6 +176,11 @@ class MinHeap<T> {
       parentIdx = Math.floor((i-1)/2)
     }
   }
+
+  public print() {
+    console.log(this.internal)
+  }
+
 }
 
 export { Stack, Queue, JsonSet, FunctionSet, MinHeap }

@@ -116,7 +116,7 @@ export async function taskTwo(input: string[]): Promise<void> {
     const nonDuplicateSlopes = allSlopes
     const halfSortedSlopes = [
         ...nonDuplicateSlopes,
-        ...nonDuplicateSlopes.map(([y,x]) => [-y,x]).filter(([y,x])=>y !=0 && x != 1)
+        ...nonDuplicateSlopes.map(([y,x]) => [-y,x]).filter(([y,x])=>y !=0 || x != 1)
     ].map(i => {
         if (Math.abs(i[0]) == 0) return [0, i[1]]
         if (Math.abs(i[1]) == 0) return [i[0], 0]
@@ -127,8 +127,7 @@ export async function taskTwo(input: string[]): Promise<void> {
     }).sort((a,b) => {
         return a.a < b.a ? 1:-1
     }).map(s => s.s)
-    const sortedSlopes = [...halfSortedSlopes, ...halfSortedSlopes.reverse().filter(([y,x])=>Math.abs(y)!=1&&x!=0).map(([y,x]) => [y,-x])].map(([y,x])=>[-y,x])
-    console.log(sortedSlopes)
+    const sortedSlopes = [...halfSortedSlopes, ...halfSortedSlopes.reverse().filter(([y,x])=>Math.abs(y)!=1||x!=0).map(([y,x]) => [y,-x])].map(([y,x])=>[-y,x])
 
     let slopeIndex = 0
     let removedCount = 0
@@ -147,9 +146,7 @@ export async function taskTwo(input: string[]): Promise<void> {
         removedCount++
         slopeIndex++
         if(slopeIndex >= sortedSlopes.length) slopeIndex = 0
-        //console.log(removedCount, lastMeteor)
     }
-    print()
     console.log(lastMeteor[1]*100+lastMeteor[0])
 
     function check(x: number, y: number, xD: number, yD: number) {
