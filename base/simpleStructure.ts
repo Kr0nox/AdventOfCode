@@ -159,6 +159,7 @@ class MinHeap<T> {
         this.internal[index] = this.internal[smallestIdx]
         this.internal[smallestIdx] = t
       }
+      index = smallestIdx
     }
     return min.v
   }
