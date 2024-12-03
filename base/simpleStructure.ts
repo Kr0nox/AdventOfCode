@@ -176,6 +176,11 @@ class MinHeap<T> {
       parentIdx = Math.floor((i-1)/2)
     }
   }
+
+  public print() {
+    console.log(this.internal)
+  }
+
 }
 
 export { Stack, Queue, JsonSet, FunctionSet, MinHeap }
