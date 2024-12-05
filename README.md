@@ -9,7 +9,7 @@ Whatever I feel like today. But it will most likely either be Java, Python, C++,
 
 <h3>2024</h3>
 
-![](https://img.shields.io/badge/stars%20⭐-8-yellow)
+![](https://img.shields.io/badge/stars%20⭐-10-yellow)
 
 |Day|Language|
 |--|--|
@@ -17,6 +17,7 @@ Whatever I feel like today. But it will most likely either be Java, Python, C++,
 |2|TypeScript|
 |3|TypeScript|
 |4|TypeScript|
+|5|TypeScript|
 
 
 <h3><a href="2023/README.md">2023</a></h3>
