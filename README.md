@@ -1,6 +1,6 @@
 # My Advent of Code Solutions
 
-![](https://img.shields.io/badge/Total%20stars%20⭐-421-yellow)
+![](https://img.shields.io/badge/Total%20stars%20⭐-423-yellow)
 
 ## What language do I use?
 Whatever I feel like today. But it will most likely either be Java, Python, C++, Typescript or Haskell
@@ -9,7 +9,7 @@ Whatever I feel like today. But it will most likely either be Java, Python, C++,
 
 <h3>2024</h3>
 
-![](https://img.shields.io/badge/stars%20⭐-8-yellow)
+![](https://img.shields.io/badge/stars%20⭐-12-yellow)
 
 |Day|Language|
 |--|--|
@@ -17,6 +17,8 @@ Whatever I feel like today. But it will most likely either be Java, Python, C++,
 |2|TypeScript|
 |3|TypeScript|
 |4|TypeScript|
+|5|TypeScript|
+|6|TypeScript|
 
 
 <h3><a href="2023/README.md">2023</a></h3>
