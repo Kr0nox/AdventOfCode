@@ -2,7 +2,7 @@ import {lcm} from '../../base'
 
 export async function taskOne(input: string[]): Promise<void> {
     const sec = [0,1,0,-1]
-    let inp = input[0].repeat(1000).split('').map(Number)
+    let inp = input[0].split('').map(Number)
 
     for (let i = 0; i < 100; i++) {
         inp = doRound(inp)
@@ -36,8 +36,23 @@ export async function taskOne(input: string[]): Promise<void> {
 }
 
 export async function taskTwo(input: string[]): Promise<void> {
-    const sec = [0,1,0,-1]
-    function doRound(inp: number[]) {
-        
-    }
+    /*
+    We abuse two things:
+    1) the offset will be in the second half of the long number list
+    2) The applied pattern start 0,1,... => Due to this a digit that is generated is just determined by the sum of all values that are at and anfter the index
+    */
+   let totalInput = input[0].repeat(10000)
+   const offset = Number(input[0].substring(0,7))
+   let curNumber = totalInput.substring(offset).split('').map(Number)
+
+   for (let round = 0; round < 100; round++) {
+        let totalSum = curNumber.reduce((a,b)=>a+b,0)
+        curNumber = curNumber.map((i, idx) => {
+            if (idx == 0) return totalSum % 10
+            totalSum -= curNumber[idx-1]
+            return totalSum % 10
+        })
+   }
+   console.log(curNumber.join('').substring(0,8))
+
 }
