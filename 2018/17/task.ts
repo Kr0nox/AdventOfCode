@@ -1,7 +1,26 @@
-
-import { readdir, writeFile } from 'fs/promises';
-
 export async function taskOne(input: string[]): Promise<void> {
+    const grid = task(input)
+    let c = 0
+    for (let x = 0; x < grid.length; x++) {
+        for (let y = 0; y < grid[0].length; y++) {
+            if (grid[x][y] == WaterState.WATER || grid[x][y] == WaterState.FLOWING) c++
+        }
+    }
+    console.log(c)
+}
+
+export async function taskTwo(input: string[]): Promise<void> {
+    const grid = task(input)
+    let c = 0
+    for (let x = 0; x < grid.length; x++) {
+        for (let y = 0; y < grid[0].length; y++) {
+            if (grid[x][y] == WaterState.WATER) c++
+        }
+    }
+    console.log(c)
+}
+
+function task(input: string[]) {
     const ranges = parseInput(input)
     let minX = 500
     let minY = Infinity
@@ -23,109 +42,95 @@ export async function taskOne(input: string[]): Promise<void> {
             }
         }
     }
-    
-    const yLen = grid[0].length
-    grid[500-minX][0] = WaterState.WATER
-    recurseFrom(500-minX, 0,)
-    //print(grid)
-    
-    await writeFile("test.txt", toStringArray(grid).join('\n'))
 
-
-    function recurseFrom(x: number, y: number) {
-        if (grid[x][y+1] == WaterState.NONE) {
-            let curY = y
-            while((curY + 1) < yLen && grid[x][curY+1] == WaterState.NONE) curY++
-            if ((curY + 1) < yLen) {
-                let filledRow = true
-                while(curY > y) {
-                    while(y < curY && canFillRow(x,curY)) {
-                        fillRow(x,curY)
-                        filledRow = true
-                        curY--
+    for (let y = grid[0].length-2; y >= 0; y--) {
+        let x = 0
+        let hadLeft = false
+        let hadFloorSinceLast = true
+        while(x < grid.length) {
+            if (grid[x][y] == WaterState.SAND) {
+                if (hadLeft && hadFloorSinceLast) {
+                    let dX = x - 1
+                    while(grid[dX][y] != WaterState.SAND) {
+                        grid[dX][y] = WaterState.POTENTIAL_WATER
+                        dX--
                     }
-                    if (filledRow)
-                        fillDropRow(x, curY)
-                    else 
-                        curY--
-                    filledRow = false
                 }
-                
-            }
-            curY = y + 1
-            while(grid[x][curY] == WaterState.NONE) {
-                grid[x][curY] = WaterState.WATER
-                curY++
-            }
-            
-            
-            
+                hadFloorSinceLast = true
+                hadLeft = true
+            } 
+            if (grid[x][y+1] == WaterState.NONE) hadFloorSinceLast = false
+            x++
         }
     }
+    const yLen = grid[0].length
+    drop(500-minX,0)
+    return grid
 
-    function canFillRow(x: number, y:number) {
-        let cX = x
-        while(cX < grid.length && grid[cX][y] != WaterState.SAND && grid[cX][y+1] != WaterState.NONE) cX++
-        if (cX >= grid.length || grid[cX][y+1] == WaterState.NONE) return false
-        cX = x
-        while(cX >= 0 && grid[cX][y] != WaterState.SAND && grid[cX][y+1] != WaterState.NONE) cX--
-        if (cX < 0 || grid[cX][y+1] == WaterState.NONE) return false
-        return true
-    }
+    
 
-    function fillRow(x: number, y: number) {
-        let cX = x
-        while(cX >= 0 && grid[cX][y] != WaterState.SAND && grid[cX][y+1] != WaterState.NONE) cX--
+    function drop(x: number, y: number) {
+        while(y < yLen && grid[x][y] == WaterState.NONE) {
+            grid[x][y] = WaterState.FLOWING
+            y++
+        }
+        if (y >= yLen) return
+        if (grid[x][y] == WaterState.WATER || grid[x][y] == WaterState.FLOWING) return
+
+        fillPotential(x,y)
+
+        let dX = x + 1
+        y--
+        while((grid[dX][y+1] == WaterState.SAND || grid[dX][y+1] == WaterState.WATER) && grid[dX][y] == WaterState.NONE) {
+            grid[dX][y] = WaterState.FLOWING
+            dX++
+        }
         
-        cX++
-        while(grid[cX][y] != WaterState.SAND) {
-            grid[cX][y] = WaterState.WATER
-            cX++
+        if (grid[dX][y] == WaterState.NONE) {
+            drop(dX, y)
+        }
+
+        dX = x - 1
+        while((grid[dX][y+1] == WaterState.SAND || grid[dX][y+1] == WaterState.WATER) && grid[dX][y] == WaterState.NONE) {
+            grid[dX][y] = WaterState.FLOWING
+            dX--
+        }
+        if (grid[dX][y] == WaterState.NONE) {
+            drop(dX, y)
         }
     }
 
-    function fillDropRow(x: number, y: number) {
-        let cX = x
-        while(cX < grid.length && grid[cX][y+1] != WaterState.NONE && grid[cX][y] != WaterState.SAND) {
-            grid[cX][y] = WaterState.WATER
-            cX++
-        }
-        if (cX < grid.length && grid[cX][y+1] == WaterState.NONE && grid[cX][y] != WaterState.SAND) {
-            grid[cX][y] = WaterState.WATER
-            recurseFrom(cX,y)
-        }
-        cX = x - 1
-        while(cX >= 0 && grid[cX][y+1] != WaterState.NONE && grid[cX][y] != WaterState.SAND) {
-            grid[cX][y] = WaterState.WATER
-            cX--
-        }
-
-        if (cX >= 0 && grid[cX][y+1] == WaterState.NONE && grid[cX][y] != WaterState.SAND) {
-            grid[cX][y] = WaterState.WATER
-            recurseFrom(cX,y)
-        }
-    }
-
-    let count = 0
-
-    for (let x = 0; x < grid.length; x++) {
-        for (let y = 0; y < grid[x].length; y++) {
-            if (grid[x][y] == WaterState.WATER) count++
+    function fillPotential(x: number, y: number) {
+        let tY = y
+        while (grid[x][tY] == WaterState.POTENTIAL_WATER) {
+            let dX = x
+            while(grid[dX][tY] != WaterState.SAND) {
+                grid[dX][tY] = WaterState.WATER
+                if (grid[dX][tY+1] == WaterState.POTENTIAL_WATER) {
+                    fillPotential(dX,tY+1)
+                }
+                dX++
+            }
+            dX = x
+            while(grid[dX][tY] != WaterState.SAND) {
+                grid[dX][tY] = WaterState.WATER
+                if (grid[dX][tY+1] == WaterState.POTENTIAL_WATER) {
+                    fillPotential(dX,tY+1)
+                }
+                dX--
+            }
+            tY++
         }
     }
-    console.log(count)
 }
 
-export async function taskTwo(input: string[]): Promise<void> {
-    console.log("Unimplemented");
-}
 
 interface Range {
     x1: number, x2: number, y1: number, y2: number
 }
 
 enum WaterState {
-    NONE, SAND, WATER
+    NONE, SAND, WATER, POTENTIAL_WATER, FLOWING
 }
 
 function parseInput(input: string[]) {
@@ -148,21 +153,4 @@ function parseInput(input: string[]) {
         }
         return r
     })
-}
-
-function print(grid: WaterState[][]) {
-    console.log(toStringArray(grid))
-}
-
-function toStringArray(grid: WaterState[][]) {
-    const p = Array.from({length: grid[0].length}, () => Array.from({length: grid.length}, () => ' '))
-    for (let x = 0; x < grid.length; x++) {
-        for (let y = 0; y < grid[x].length; y++) {
-            if (grid[x][y] == WaterState.WATER) p[y][x] = '~'
-            if (grid[x][y] == WaterState.SAND) p[y][x] = '#'
-            //if (grid[x][y] == WaterState.TEST1) p[y][x] = '1'
-            //if (grid[x][y] == WaterState.TEST2) p[y][x] = '2'
-        }
-    }
-    return p.map(i => i.join(''))
 }
