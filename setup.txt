@@ -1,0 +1,41 @@
+import {lcmArr, lcm, gcd, ComplexNumber,  Stack, Queue, JsonSet, FunctionSet, MinHeap } from '../../base'
+
+export async function taskOne(input: string[]): Promise<void> {
+
+}
+
+export async function taskTwo(input: string[]): Promise<void> {
+
+}
+
+/*
+const grid = input.map(i => i.split(''))
+
+for (let y = 0; y < grid.length; y++) {
+    for (let x = 0; x < grid[y].length; x++) {
+
+    }
+}
+
+
+const queue = new Queue<State>()
+const visited = new Set<string>()
+queue.push()
+
+while(!queue.isEmpty()) {
+    const q = q.pop()
+    const k = q.x + '|' + q.y
+    if (visited.has(k)) continue
+    visited.add(k)
+
+    for () {
+        queue.push()
+    }
+}
+
+interface State {
+    x: number
+    y: number
+}
+
+*/
