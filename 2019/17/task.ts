@@ -41,11 +41,18 @@ export async function taskTwo(input: string[]): Promise<void> {
             if (right == '#') checkSum += 8
             if ([1,2,4,8,15].includes(checkSum)) {
                 intersections.push([x,y])
-            } else if (checkSum != 3 && checkSum != 12) {
-                console.log(checkSum)
+            }
+            if ([1,2,4,8].includes(checkSum)) {
+                console.log('end')
             }
         }
     }
+
+    console.log(rX, rY)
+    for (const r of grid) {
+        console.log(r)
+    }
+
     console.log(intersections.length)
 
     
@@ -57,6 +64,10 @@ export async function taskTwo(input: string[]): Promise<void> {
     interface Neighbour {
         id: number,
         way: string[]
+    }
+
+    function splitPath(path: string): { r: 'false' } | { r: 'maybe', } {
+
     }
 }
 

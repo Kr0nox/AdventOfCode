@@ -158,9 +158,9 @@ export async function taskTwo(input: string[]): Promise<void> {
     const is: number[] = Array.from({length: 50}, () => 0)
     const relBases: number[] = Array.from({length: 50}, () => 0)
     const inputs: Queue<number>[] = Array.from({length: 50}, () => new Queue<number>())
-    const outputs: number[][] = Array.from({length: 50}, () => [])
+    const outputs: number[][] = Array.from({length: 50}, () => [])  
     let NAT = [-1, -1]
-    let lastNumbers
+    let lastNumbers = new Set<number>()
 
     for (let unit = 0; unit < 50; unit++) {
         inputs[unit].push(unit)
@@ -168,100 +168,116 @@ export async function taskTwo(input: string[]): Promise<void> {
 
 
     while (true) {
+        let successfullIO = false
         for (let unit = 0; unit < 50; unit++) {
-            const i = is[unit]
-            if(lists[unit][i] != 99) {
-                const op = lists[unit][i] % 100
-                switch (op) {
-                    case 1: {
-                        const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
-                        const b = getVal(i+2, getAtDigit(lists[unit][i], 1000), unit)
-                        lists[unit][getGoalIndex(i+3, getAtDigit(lists[unit][i], 10000), unit)] = c + b
-                        is[unit]+=4
-                        break
-                        
-                    }
-                    case 2: {
-                        const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
-                        const b = getVal(i+2, getAtDigit(lists[unit][i], 1000), unit)
-                        lists[unit][getGoalIndex(i+3, getAtDigit(lists[unit][i], 10000), unit)] = c * b
-                        is[unit]+=4
-                        break
-                    }
-                    case 3: {
-                        if(inputs[unit].isEmpty()) {
-                            lists[unit][getGoalIndex(i+1, getAtDigit(lists[unit][i], 100), unit)] = -1
-                        } else {
-                            lists[unit][getGoalIndex(i+1, getAtDigit(lists[unit][i], 100), unit)] = inputs[unit].pop()
+            let breakOuter = false;
+            if(lists[unit][is[unit]] != 99) {
+                while (!breakOuter) {
+                    const i = is[unit]
+                    const op = lists[unit][i] % 100
+                    switch (op) {
+                        case 1: {
+                            const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
+                            const b = getVal(i+2, getAtDigit(lists[unit][i], 1000), unit)
+                            lists[unit][getGoalIndex(i+3, getAtDigit(lists[unit][i], 10000), unit)] = c + b
+                            is[unit]+=4
+                            break
+                            
                         }
-                        is[unit] += 2
-                        break
-                    }
-                    case 4: {
-                        const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
-                        outputs[unit].push(c)
-                        if (outputs[unit].length == 3) {
-                            const goal = outputs[unit][0]
-                            const x = outputs[unit][1]
-                            const y = outputs[unit][2]
-                            outputs[unit] = []
-                            if (goal == 255) {
-                                NAT = [x,y]
+                        case 2: {
+                            const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
+                            const b = getVal(i+2, getAtDigit(lists[unit][i], 1000), unit)
+                            lists[unit][getGoalIndex(i+3, getAtDigit(lists[unit][i], 10000), unit)] = c * b
+                            is[unit]+=4
+                            break
+                        }
+                        case 3: {
+                            if(inputs[unit].isEmpty()) {
+                                lists[unit][getGoalIndex(i+1, getAtDigit(lists[unit][i], 100), unit)] = -1
+                                breakOuter = true
                             } else {
-                                inputs[goal].push(x)
-                                inputs[goal].push(y)
+                                lists[unit][getGoalIndex(i+1, getAtDigit(lists[unit][i], 100), unit)] = inputs[unit].pop()
+                                successfullIO = true
                             }
+                            is[unit] += 2
+                            break
                         }
-                        is[unit] += 2
-                        break
-                    }
-                    case 5: {
-                        const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
-                        const b = getVal(i+2, getAtDigit(lists[unit][i], 1000), unit)
-                        if (c != 0) {
-                            is[unit] = b
-                        } else {
-                            is[unit] += 3
+                        case 4: {
+                            const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
+                            outputs[unit].push(c)
+                            if (outputs[unit].length == 3) {
+                                const goal = outputs[unit][0]
+                                const x = outputs[unit][1]
+                                const y = outputs[unit][2]
+                                outputs[unit] = []
+                                if (goal == 255) {
+                                    NAT = [x,y]
+                                } else {
+                                    inputs[goal].push(x)
+                                    inputs[goal].push(y)
+                                }
+                            }
+                            successfullIO = true
+                            is[unit] += 2
+                            break
                         }
-                        break
-                    }
-                    case 6: {
-                        const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
-                        const b = getVal(i+2, getAtDigit(lists[unit][i], 1000), unit)
-                        if (c == 0) {
-                            is[unit] = b
-                        } else {
-                            is[unit] += 3
+                        case 5: {
+                            const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
+                            const b = getVal(i+2, getAtDigit(lists[unit][i], 1000), unit)
+                            if (c != 0) {
+                                is[unit] = b
+                            } else {
+                                is[unit] += 3
+                            }
+                            break
                         }
-                        break
-                    }
-                    case 7: {
-                        const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
-                        const b = getVal(i+2, getAtDigit(lists[unit][i], 1000), unit)
-                        lists[unit][getGoalIndex(i+3, getAtDigit(lists[unit][i], 10000), unit)] = c < b ? 1:0
-                        is[unit] += 4
-                        break
-                    }
-                    case 8: {
-                        const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
-                        const b = getVal(i+2, getAtDigit(lists[unit][i], 1000), unit)
-                        lists[unit][getGoalIndex(i+3, getAtDigit(lists[unit][i], 10000), unit)] = c == b ? 1:0
-                        is[unit] += 4
-                        break
-                    }
-                    case 9: {
-                        const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
-                        relBases[unit] += c
-                        is[unit]+=2
-                        break
-                    }
-                    default: {
-                        throw i
+                        case 6: {
+                            const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
+                            const b = getVal(i+2, getAtDigit(lists[unit][i], 1000), unit)
+                            if (c == 0) {
+                                is[unit] = b
+                            } else {
+                                is[unit] += 3
+                            }
+                            break
+                        }
+                        case 7: {
+                            const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
+                            const b = getVal(i+2, getAtDigit(lists[unit][i], 1000), unit)
+                            lists[unit][getGoalIndex(i+3, getAtDigit(lists[unit][i], 10000), unit)] = c < b ? 1:0
+                            is[unit] += 4
+                            break
+                        }
+                        case 8: {
+                            const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
+                            const b = getVal(i+2, getAtDigit(lists[unit][i], 1000), unit)
+                            lists[unit][getGoalIndex(i+3, getAtDigit(lists[unit][i], 10000), unit)] = c == b ? 1:0
+                            is[unit] += 4
+                            break
+                        }
+                        case 9: {
+                            const c = getVal(i+1, getAtDigit(lists[unit][i], 100), unit)
+                            relBases[unit] += c
+                            is[unit]+=2
+                            break
+                        }
+                        default: {
+                            throw `${unit} ${i} ${lists[unit][i]}`
+                        }
                     }
                 }
             }
+        }
 
-            
+        if (!successfullIO) {
+            if (lastNumbers.has(NAT[1])) {
+                console.log(NAT[1])
+                return
+            }
+            lastNumbers.add(NAT[1])
+            inputs[0].push(NAT[0])
+            inputs[0].push(NAT[1])
+
         }
     }
 
