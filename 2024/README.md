@@ -15,3 +15,4 @@
 |10|Typescript|673 / 442|
 |11|Typescript|414 / 803|
 |12|Typescript|1588 / 4633|
+|13|Typescript|675 / 1094|
