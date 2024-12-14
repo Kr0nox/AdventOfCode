@@ -54,7 +54,7 @@ export async function taskTwo(input: string[]): Promise<void> {
         }
         if (d < minDist) {
             minDist = d
-            console.log(round)
+            console.log(round-1)
             toGrid()
         }
     }
