@@ -23,7 +23,7 @@ const visited = new Set<string>()
 queue.push()
 
 while(!queue.isEmpty()) {
-    const q = q.pop()
+    const q = queue.pop()
     const k = q.x + '|' + q.y
     if (visited.has(k)) continue
     visited.add(k)
