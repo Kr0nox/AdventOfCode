@@ -1,5 +1,5 @@
 # 2024
-![](https://img.shields.io/badge/stars%20⭐-30-yellow)
+![](https://img.shields.io/badge/stars%20⭐-32-yellow)
 
 |Day|Language|Leaderboard (Part 1 / Part 2)|
 |--|--|--|
@@ -18,3 +18,4 @@
 |13|Typescript|675 / 1094|
 |14|Typescript|895 / 296|
 |15|Typescript|882 / 1670|
+|16|Typescript|347 / 1292|
